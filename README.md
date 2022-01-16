@@ -1,7 +1,7 @@
 # Outer Wilds Music Player
 Jam to your favourite songs in Outer Wilds!
 
-![unknown](https://user-images.githubusercontent.com/35664389/146685189-d800b557-4a90-4f51-a2e7-86e8e0d3e62e.png)
+![unknown](https://user-images.githubusercontent.com/35664389/149643012-122579e2-8d69-464f-a946-8f7dbb40021f.png)
 
 # What can you do?
 You can play your favourite songs from a folder in the mods directory by placing WAV files in the folder and selecting them ingame.
