@@ -24,7 +24,7 @@ namespace MusicPlayer
         private double _audioVolume = 0.2;
         private double _shipAudioVolume = 0.5;
         private int currentSong = 0;
-        private int songsAvailable;
+        private int songsAvailable => musicTracks.Count;
 
         private void Awake()
         {
@@ -41,8 +41,7 @@ namespace MusicPlayer
         {
             if (Keyboard.current.slashKey.wasPressedThisFrame)
             {
-                songsAvailable = musicTracks.Count;
-                ModHelper.Console.WriteLine("Amount of loaded songs " + musicTracks.Count.ToString(), OWML.Common.MessageType.Success);
+                ModHelper.Console.WriteLine("Amount of loaded songs " + songsAvailable.ToString(), OWML.Common.MessageType.Success);
                 if (playerIsPlaying)
                 {
                     PlayerHeadsetAudioSource.Stop();
@@ -54,6 +53,7 @@ namespace MusicPlayer
                     playerIsPlaying = true;
                 }
             }
+
             if (Keyboard.current.altKey.wasPressedThisFrame)
             {
                 if (isPlaying)
@@ -67,11 +67,14 @@ namespace MusicPlayer
                     isPlaying = true;
                 }
             }
+
+            if (songsAvailable == 0) return;
+
             if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
             {
                 if (playerIsPlaying)
                 {
-                    if (currentSong > songsAvailable)
+                    if (currentSong < 0 || currentSong >= songsAvailable)
                     {
                         PlayerHeadsetAudioSource.Stop();
                         ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
@@ -90,7 +93,7 @@ namespace MusicPlayer
                 }
                 if (isPlaying)
                 {
-                    if (currentSong > songsAvailable)
+                    if (currentSong < 0 || currentSong >= songsAvailable)
                     {
                         ShipSpeakerAudioSource.Stop();
                         ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
@@ -110,58 +113,72 @@ namespace MusicPlayer
                 else
                     ModHelper.Console.WriteLine("Your not playing silly!", OWML.Common.MessageType.Success);
             }
-            if (!Keyboard.current.leftArrowKey.wasPressedThisFrame)
-                return;
-            if (playerIsPlaying)
+
+            if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
             {
-                if (currentSong < 0)
+                if (playerIsPlaying)
                 {
-                    PlayerHeadsetAudioSource.Stop();
-                    ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
-                    currentSong = 0;
-                    PlayerHeadsetAudioSource.clip = musicTracks[currentSong];
-                    PlayerHeadsetAudioSource.Play();
+                    if (currentSong < 0 || currentSong >= songsAvailable)
+                    {
+                        PlayerHeadsetAudioSource.Stop();
+                        ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
+                        currentSong = 0;
+                        PlayerHeadsetAudioSource.clip = musicTracks[currentSong];
+                        PlayerHeadsetAudioSource.Play();
+                    }
+                    else
+                    {
+                        PlayerHeadsetAudioSource.Stop();
+                        --currentSong;
+                        PlayerHeadsetAudioSource.clip = musicTracks[currentSong];
+                        PlayerHeadsetAudioSource.Play();
+                        ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
+                    }
+                }
+                else if (isPlaying)
+                {
+                    if (currentSong < 0 || currentSong >= songsAvailable)
+                    {
+                        ShipSpeakerAudioSource.Stop();
+                        ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
+                        currentSong = 0;
+                        ShipSpeakerAudioSource.clip = musicTracks[currentSong];
+                        ShipSpeakerAudioSource.Play();
+                    }
+                    else
+                    {
+                        ShipSpeakerAudioSource.Stop();
+                        --currentSong;
+                        ShipSpeakerAudioSource.clip = musicTracks[currentSong];
+                        ShipSpeakerAudioSource.Play();
+                        ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
+                    }
                 }
                 else
-                {
-                    PlayerHeadsetAudioSource.Stop();
-                    --currentSong;
-                    PlayerHeadsetAudioSource.clip = musicTracks[currentSong];
-                    PlayerHeadsetAudioSource.Play();
-                    ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
-                }
+                    ModHelper.Console.WriteLine("Your not playing silly!", OWML.Common.MessageType.Success);
             }
-            else if (isPlaying)
-            {
-                if (currentSong < 0)
-                {
-                    ShipSpeakerAudioSource.Stop();
-                    ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
-                    currentSong = 0;
-                    ShipSpeakerAudioSource.clip = musicTracks[currentSong];
-                    ShipSpeakerAudioSource.Play();
-                }
-                else
-                {
-                    ShipSpeakerAudioSource.Stop();
-                    --currentSong;
-                    ShipSpeakerAudioSource.clip = musicTracks[currentSong];
-                    ShipSpeakerAudioSource.Play();
-                    ModHelper.Console.WriteLine("List Index : " + currentSong.ToString(), OWML.Common.MessageType.Success);
-                }
-            }
-            else
-                ModHelper.Console.WriteLine("Your not playing silly!", OWML.Common.MessageType.Success);
         }
 
         private void OnPlaySong()
         {
+            if (songsAvailable == 0)
+            {
+                ModHelper.Console.WriteLine("No songs are available to play!", OWML.Common.MessageType.Error);
+                return;
+            }
+            if (currentSong < 0 || currentSong >= songsAvailable) currentSong = 0;
             PlayerHeadsetAudioSource.clip = musicTracks[currentSong];
             PlayerHeadsetAudioSource.Play();
         }
 
         private void ShipOnPlaySong()
         {
+            if (songsAvailable == 0)
+            {
+                ModHelper.Console.WriteLine("No songs are available to play!", OWML.Common.MessageType.Error);
+                return;
+            }
+            if (currentSong < 0 || currentSong >= songsAvailable) currentSong = 0;
             ShipSpeakerAudioSource.clip = musicTracks[currentSong];
             ShipSpeakerAudioSource.Play();
         }
