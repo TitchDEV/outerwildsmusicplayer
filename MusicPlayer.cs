@@ -222,14 +222,50 @@ namespace MusicPlayer
                         audioType = UAudioType.OGGVORBIS;
                     else if (fileInfo.Extension.Equals(".wav"))
                         audioType = UAudioType.WAV;
-                    using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(fileInfo.FullName, audioType))
+                    else if (fileInfo.Extension.Equals(".mp3"))
+                        audioType = UAudioType.MPEG;
+                    else
+                        ModHelper.Console.WriteLine($"Invalid audio file extension ({fileInfo.Extension}) must be .wav or .ogg", OWML.Common.MessageType.Error);
+
+                    if (audioType == UAudioType.MPEG)
                     {
-                        yield return www.SendWebRequest();
-                        AudioClip content = DownloadHandlerAudioClip.GetContent(www);
-                        content.name = name;
-                        Object.DontDestroyOnLoad(content);
-                        musicTracks.Add(content);
-                        ModHelper.Console.WriteLine($"Track Loaded : {content.length}", OWML.Common.MessageType.Success);
+                        string fileProtocolPath = $"file://{fileInfo.FullName}";
+                        DownloadHandlerAudioClip dh = new DownloadHandlerAudioClip(fileProtocolPath, UAudioType.MPEG);
+                        dh.compressed = true;
+                        using (UnityWebRequest www = new UnityWebRequest(fileProtocolPath, "GET", dh, null))
+                        {
+                            yield return www.SendWebRequest();
+
+                            if (www.isNetworkError)
+                                ModHelper.Console.WriteLine(www.error, OWML.Common.MessageType.Error);
+                            else
+                            {
+
+                                AudioClip content = dh.audioClip;
+                                content.name = name;
+                                Object.DontDestroyOnLoad(content);
+                                musicTracks.Add(content);
+                                ModHelper.Console.WriteLine($"Track Loaded : {content.length}", OWML.Common.MessageType.Success);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(fileInfo.FullName, audioType))
+                        {
+                            yield return www.SendWebRequest();
+
+                            if (www.isNetworkError)
+                                ModHelper.Console.WriteLine(www.error, OWML.Common.MessageType.Error);
+                            else
+                            {
+                                AudioClip content = DownloadHandlerAudioClip.GetContent(www);
+                                content.name = name;
+                                Object.DontDestroyOnLoad(content);
+                                musicTracks.Add(content);
+                                ModHelper.Console.WriteLine($"Track Loaded : {content.length}", OWML.Common.MessageType.Success);
+                            }
+                        }
                     }
                 }
             }
