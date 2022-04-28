@@ -182,9 +182,17 @@ namespace MusicPlayer
             }
         }
 
+        private string MusicFilesPath => Path.Combine(ModHelper.Manifest.ModFolderPath, "MusicFiles");
+
         private IEnumerator LoadAllAudio()
         {
-            FileInfo[] fileInfoArray = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ("OuterWildsModManager\\OWML\\Mods\\Titch.OWMusicPlayer\\MusicFiles"))).GetFiles("*.*", SearchOption.AllDirectories);
+            DirectoryInfo dir = new DirectoryInfo(MusicFilesPath);
+            if (!dir.Exists)
+            {
+                dir.Create();
+                yield break;
+            }
+            FileInfo[] fileInfoArray = dir.GetFiles("*.*", SearchOption.AllDirectories);
             for (int index = 0; index < fileInfoArray.Length; ++index)
             {
                 FileInfo fileInfo = fileInfoArray[index];
