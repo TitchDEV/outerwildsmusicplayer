@@ -1,0 +1,8 @@
+{
+  "filename": "OWMusicPlayer.dll",
+  "author": "Titch",
+  "name": "Outer Wilds Music Player",
+  "uniqueName": "Titch.OWMusicPlayer",
+  "version": "0.1.1",
+  "owmlVersion": "2.3.2"
+}
